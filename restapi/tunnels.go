@@ -1,4 +1,4 @@
-// ulacli CLI used for interacting with holeulacli.io
+// ulacli CLI used for interacting with holepunch.io
 // Copyright (C) 2018-2019  Orb.House, LLC
 //
 // This program is free software: you can redistribute it and/or modify
@@ -37,7 +37,7 @@ type Tunnel struct {
 	Subdomain *Subdomain `jsonapi:"relation,subdomain,omitempty"`
 }
 
-//CreateTunnelAPI calls holeulacli web api to get tunnel details
+//CreateTunnelAPI calls holepunch web api to get tunnel details
 func (restClient *RestClient) CreateTunnelAPI(subdomain string, publicKey string, protocol []string) (Tunnel, error) {
 	tunnelReturn := Tunnel{}
 	var outputBuffer bytes.Buffer

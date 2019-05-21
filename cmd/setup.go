@@ -1,4 +1,4 @@
-// ulacli CLI used for interacting with holeulacli.io
+// ulacli CLI used for interacting with holepunch.io
 // Copyright (C) 2018-2019  Orb.House, LLC
 //
 // This program is free software: you can redistribute it and/or modify
@@ -30,7 +30,7 @@ var setupCmd = &cobra.Command{
 	Use:   "setup",
 	Short: "Setup ulacli (run this first)",
 	Long: "Setup ulacli.\n" +
-		"This will ask you for your holeulacli credentials and help you create pub/priv keys if needed.",
+		"This will ask you for your holepunch credentials and help you create pub/priv keys if needed.",
 	Run: func(cmd *cobra.Command, args []string) {
 		var setupKey string
 		setupLogin()
@@ -45,14 +45,14 @@ var setupCmd = &cobra.Command{
 				"\n You can also generate keys using the generate-key command")
 			return
 		}
-		err := generateKey("", "holeulacli_key")
+		err := generateKey("", "holepunch_key")
 		if err != nil {
 			reportError("Could not generate key", true)
 		}
 		fmt.Print("Generated keys in the current directory ")
 		d := color.New(color.FgGreen, color.Bold)
 		d.Printf("✔\n")
-		err = writeKeysToConfig("", "holeulacli_key")
+		err = writeKeysToConfig("", "holepunch_key")
 		if err != nil {
 			reportError("Failed to update config file", true)
 		}

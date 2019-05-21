@@ -1,4 +1,4 @@
-// ulacli CLI used for interacting with holeulacli.io
+// ulacli CLI used for interacting with holepunch.io
 // Copyright (C) 2018-2019  Orb.House, LLC
 //
 // This program is free software: you can redistribute it and/or modify
@@ -52,8 +52,8 @@ var version string
 var rootCmd = &cobra.Command{
 	Version: version,
 	Use:     "ulacli",
-	Short:   "ulacli - CLI for holeulacli.io",
-	Long: "ulacli - CLI for holeulacli.io\n" +
+	Short:   "ulacli - CLI for holepunch.io",
+	Long: "ulacli - CLI for holepunch.io\n" +
 		"To get started, run `ulacli setup`.\n" +
 		"Then you could expose a local web server running on port 8080 like this, `ulacli http 8080`.\n" +
 		"Look at the commands below to see what else you can do.",
@@ -68,7 +68,7 @@ var rootCmd = &cobra.Command{
 		rollbar.SetCodeVersion(version)
 		rollbar.SetServerRoot("github.com/CypherpunkArmory/ulacli")
 		rollbar.SetCaptureIp(rollbar.CaptureIpNone)
-		rollbar.SetEnabled(crashReporting && apiEndpoint == "https://api.holeulacli.io")
+		rollbar.SetEnabled(crashReporting && apiEndpoint == "https://api.holepunch.io")
 	},
 }
 
@@ -83,7 +83,7 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "Default is $XDG_HOME/holeulacli/~.ulacli.toml")
+	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "Default is $XDG_HOME/holepunch/~.ulacli.toml")
 	rootCmd.PersistentFlags().StringVar(&logLevel, "loglevel", "", "Set the loglevel")
 	rootCmd.PersistentFlags().BoolVar(&crashReporting, "crashreporting", false, "Send crash reports to the developers")
 	err := rootCmd.PersistentFlags().MarkHidden("loglevel")
@@ -94,9 +94,9 @@ func init() {
 	viper.BindPFlag("crashreporting", rootCmd.PersistentFlags().Lookup("crashreporting"))
 	viper.BindPFlag("loglevel", rootCmd.PersistentFlags().Lookup("loglevel"))
 	viper.SetDefault("crashreporting", true)
-	viper.SetDefault("baseurl", "http://holeulacli.io")
-	viper.SetDefault("sshendpoint", "ssh://api.holeulacli.io:22")
-	viper.SetDefault("apiendpoint", "https://api.holeulacli.io")
+	viper.SetDefault("baseurl", "http://ulacli.io")
+	viper.SetDefault("sshendpoint", "ssh://api.ula.orbtestenv.net:22")
+	viper.SetDefault("apiendpoint", "https://api.ula.orbtestenv.net")
 	viper.SetDefault("publickeypath", "")
 	viper.SetDefault("privatekeypath", "")
 	viper.SetDefault("loglevel", "ERROR")
@@ -114,7 +114,7 @@ func initConfig() {
 	if configPath == "" {
 		configPath = home
 	}
-	configPath = filepath.Join(configPath, ".config", "holeulacli")
+	configPath = filepath.Join(configPath, ".config", "ulacli")
 	viper.AddConfigPath(configPath)
 	viper.SetConfigName(".ulacli")
 

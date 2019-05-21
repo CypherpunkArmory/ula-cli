@@ -1,4 +1,4 @@
-// ulacli CLI used for interacting with holeulacli.io
+// ulacli CLI used for interacting with holepunch.io
 // Copyright (C) 2018-2019  Orb.House, LLC
 //
 // This program is free software: you can redistribute it and/or modify
@@ -170,10 +170,9 @@ func createBox(tunnelConfig *Config, semaphore *Semaphore) (*ssh.Client, error) 
 		return &client, err
 	}
 
-	sshConfig := &ssh.ClientConfig{
-		User: "ulacli",
+	sshJumpConfig := &ssh.ClientConfig{
+		User: "punch",
 		Auth: []ssh.AuthMethod{
-			privateKey,
 			ssh.Password(""),
 		},
 		//TODO: Maybe fix this. Will be rotating so dont know if possible
@@ -182,10 +181,10 @@ func createBox(tunnelConfig *Config, semaphore *Semaphore) (*ssh.Client, error) 
 	}
 
 	log.Debugf("Dial into Jump Server %s", jumpServerEndpoint.String())
-	jumpConn, err := ssh.Dial("tcp", jumpServerEndpoint.String(), sshConfig)
+	jumpConn, err := ssh.Dial("tcp", jumpServerEndpoint.String(), sshJumpConfig)
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error contacting the Holeulacli Server.")
+		fmt.Fprintf(os.Stderr, "Error contacting the holepunch Server.")
 		log.Debugf("%s", err)
 		return &client, err
 	}
@@ -206,8 +205,16 @@ func createBox(tunnelConfig *Config, semaphore *Semaphore) (*ssh.Client, error) 
 		log.Debugf("Backoff Tick %s", wait.String())
 		time.Sleep(wait)
 	}
-
-	ncc, chans, reqs, err := ssh.NewClientConn(serverConn, serverEndpoint.String(), sshConfig)
+	sshBoxConfig := &ssh.ClientConfig{
+		User: "root",
+		Auth: []ssh.AuthMethod{
+			privateKey,
+		},
+		//TODO: Maybe fix this. Will be rotating so dont know if possible
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		Timeout:         0,
+	}
+	ncc, chans, reqs, err := ssh.NewClientConn(serverConn, serverEndpoint.String(), sshBoxConfig)
 	if err != nil {
 		return &client, err
 	}

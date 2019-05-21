@@ -1,4 +1,4 @@
-// ulacli CLI used for interacting with holeulacli.io
+// ulacli CLI used for interacting with holepunch.io
 // Copyright (C) 2018-2019  Orb.House, LLC
 //
 // This program is free software: you can redistribute it and/or modify
@@ -74,7 +74,7 @@ var generateKeyCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(generateKeyCmd)
-	generateKeyCmd.Flags().StringVarP(&fileName, "filename", "n", "holeulacli_key", "The name your new key files will have")
+	generateKeyCmd.Flags().StringVarP(&fileName, "filename", "n", "holepunch_key", "The name your new key files will have")
 }
 
 func generateKey(keyPath string, fileName string) error {
