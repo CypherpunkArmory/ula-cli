@@ -2,7 +2,9 @@ module github.com/cypherpunkarmory/ulacli
 
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
+	github.com/ScaleFT/sshkeys v0.0.0-20181112160850-82451a803681
 	github.com/blang/semver v3.5.1+incompatible
+	github.com/dchest/bcrypt_pbkdf v0.0.0-20150205184540-83f37f9c154a // indirect
 	github.com/fatih/color v1.7.0
 	github.com/google/jsonapi v0.0.0-20181016150055-d0428f63eb51
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
