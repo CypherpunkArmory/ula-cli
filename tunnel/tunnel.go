@@ -169,14 +169,14 @@ func createBox(tunnelConfig *Config, semaphore *Semaphore) (*ssh.Client, error) 
 	if err != nil {
 		return &client, err
 	}
+	hostKeyCallBack = ssh.InsecureIgnoreHostKey()
 
 	sshJumpConfig := &ssh.ClientConfig{
 		User: "punch",
 		Auth: []ssh.AuthMethod{
 			privateKey,
 		},
-		//TODO: Maybe fix this. Will be rotating so dont know if possible
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		HostKeyCallback: hostKeyCallBack,
 		Timeout:         0,
 	}
 
