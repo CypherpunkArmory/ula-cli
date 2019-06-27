@@ -169,7 +169,12 @@ func createBox(tunnelConfig *Config, semaphore *Semaphore) (*ssh.Client, error) 
 	if err != nil {
 		return &client, err
 	}
-	hostKeyCallBack = ssh.InsecureIgnoreHostKey()
+
+	hostKeyCallBack := dnsHostKeyCallback
+	if tunnelConfig.ConnectionEndpoint.Hostname() != "api.userland.io" {
+		fmt.Println("Ignoring hostkey")
+		hostKeyCallBack = ssh.InsecureIgnoreHostKey()
+	}
 
 	sshJumpConfig := &ssh.ClientConfig{
 		User: "punch",
