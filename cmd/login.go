@@ -69,7 +69,7 @@ func login(username string, password string) {
 	err = viper.WriteConfig()
 
 	if err != nil {
-		reportError("Couldn't write refresh token to config - are you able to write to ~/.config/holepunch/ulacli.toml?", true)
+		reportError("Couldn't write refresh token to config - are you able to write to ~/.config/userland/ulacli.toml?", true)
 	}
 	fmt.Print("Login Succesful ")
 	d := color.New(color.FgGreen, color.Bold)

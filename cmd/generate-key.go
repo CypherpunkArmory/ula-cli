@@ -74,7 +74,7 @@ var generateKeyCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(generateKeyCmd)
-	generateKeyCmd.Flags().StringVarP(&fileName, "filename", "n", "holepunch_key", "The name your new key files will have")
+	generateKeyCmd.Flags().StringVarP(&fileName, "filename", "n", "userland_key", "The name your new key files will have")
 }
 
 func generateKey(keyPath string, fileName string) error {
