@@ -1,4 +1,4 @@
-// ulacli CLI used for interacting with holepunch.io
+// Userland Cloud CLI
 // Copyright (C) 2018-2019  Orb.House, LLC
 //
 // This program is free software: you can redistribute it and/or modify
@@ -28,9 +28,9 @@ import (
 
 var setupCmd = &cobra.Command{
 	Use:   "setup",
-	Short: "Setup ulacli (run this first)",
-	Long: "Setup ulacli.\n" +
-		"This will ask you for your holepunch credentials and help you create pub/priv keys if needed.",
+	Short: "Setup Userland Cloud (run this first)",
+	Long: "Setup Userland Cloud.\n" +
+		"This will ask you for your Userland credentials and help you create pub/priv keys if needed.",
 	Run: func(cmd *cobra.Command, args []string) {
 		var setupKey string
 		setupLogin()

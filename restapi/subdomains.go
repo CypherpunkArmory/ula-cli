@@ -1,4 +1,4 @@
-// ulacli CLI used for interacting with holepunch.io
+// Userland Cloud CLI
 // Copyright (C) 2018-2019  Orb.House, LLC
 //
 // This program is free software: you can redistribute it and/or modify
@@ -69,7 +69,7 @@ func (restClient *RestClient) ListSubdomainAPI() ([]Subdomain, error) {
 	return subdomainList, nil
 }
 
-//ReserveSubdomainAPI calls holepunch web api to get reserve a subdomain
+//ReserveSubdomainAPI calls ulacli web api to get reserve a subdomain
 func (restClient *RestClient) ReserveSubdomainAPI(subdomainName string) (Subdomain, error) {
 	subdomainReturn := Subdomain{}
 	url := restClient.URL + "/subdomains"
