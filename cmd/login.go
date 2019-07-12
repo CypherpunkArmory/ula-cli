@@ -1,4 +1,4 @@
-// ulacli CLI used for interacting with holepunch.io
+// Userland Cloud CLI
 // Copyright (C) 2018-2019  Orb.House, LLC
 //
 // This program is free software: you can redistribute it and/or modify
@@ -31,8 +31,8 @@ var password string
 
 var loginCmd = &cobra.Command{
 	Use:   "login",
-	Short: "Login to holepunch.",
-	Long: "Login back into holepunch.\n" +
+	Short: "Login to UserLand Cloud.",
+	Long: "Login back into UserLand Cloud.\n" +
 		"Will prompt you for username and password, or you can provide them as optional arguments.\n" +
 		"If this is your first time using ulacli, you should use `ulacli setup` instead of `ulacli login`.",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -49,8 +49,8 @@ var loginCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(loginCmd)
-	loginCmd.Flags().StringVarP(&username, "username", "u", "", "Your holepunch.io username")
-	loginCmd.Flags().StringVarP(&password, "password", "p", "", "Your holepunch.io password")
+	loginCmd.Flags().StringVarP(&username, "username", "u", "", "Your UserLAnd Cloud username")
+	loginCmd.Flags().StringVarP(&password, "password", "p", "", "Your UserLAnd Cloud password")
 }
 
 func login(username string, password string) {
@@ -69,7 +69,7 @@ func login(username string, password string) {
 	err = viper.WriteConfig()
 
 	if err != nil {
-		reportError("Couldn't write refresh token to config - are you able to write to ~/.config/holepunch/ulacli.toml?", true)
+		reportError("Couldn't write refresh token to config - are you able to write to ~/.config/userland/ulacli.toml?", true)
 	}
 	fmt.Print("Login Succesful ")
 	d := color.New(color.FgGreen, color.Bold)

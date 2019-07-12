@@ -1,4 +1,4 @@
-// ulacli CLI used for interacting with holepunch.io
+// UserLAnd Cloud CLI
 // Copyright (C) 2018-2019  Orb.House, LLC
 //
 // This program is free software: you can redistribute it and/or modify
@@ -27,9 +27,9 @@ import (
 
 // httpCmd represents the http command
 var httpCmd = &cobra.Command{
-	Use:   "box",
-	Short: "",
-	Long:  "",
+	Use:   "start",
+	Short: "s",
+	Long:  "start",
 	Run: func(cmd *cobra.Command, args []string) {
 		startBox()
 	},

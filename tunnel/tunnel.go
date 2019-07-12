@@ -1,4 +1,4 @@
-// ulacli CLI used for interacting with holepunch.io
+// Userland Cloud CLI
 // Copyright (C) 2018-2019  Orb.House, LLC
 //
 // This program is free software: you can redistribute it and/or modify
@@ -17,7 +17,6 @@
 package tunnel
 
 import (
-	"bufio"
 	"fmt"
 	"net"
 	"os"
@@ -32,6 +31,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/tj/go-spin"
 	"golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 type tunnelStatus struct {
@@ -77,7 +77,7 @@ func StartTunnel(tunnelConfig *Config, wg *sync.WaitGroup, semaphore *Semaphore)
 	// Set IO
 	session.Stdout = ansicolor.NewAnsiColorWriter(os.Stdout)
 	session.Stderr = ansicolor.NewAnsiColorWriter(os.Stderr)
-	in, _ := session.StdinPipe()
+	session.Stdin = os.Stdin
 
 	// Set up terminal modes
 	// https://net-ssh.github.io/net-ssh/classes/Net/SSH/Connection/Term.html
@@ -86,16 +86,29 @@ func StartTunnel(tunnelConfig *Config, wg *sync.WaitGroup, semaphore *Semaphore)
 	// THIS IS THE TITLE
 	// https://pythonhosted.org/ANSIColors-balises/ANSIColors.html
 	modes := ssh.TerminalModes{
-		ssh.ECHO:  0, // Disable echoing
-		ssh.IGNCR: 1, // Ignore CR on input.
+		ssh.ECHO:          1,     // Enable echoing
+		ssh.TTY_OP_ISPEED: 14400, // input speed = 14.4kbaud
+		ssh.TTY_OP_OSPEED: 14400, // output speed = 14.4kbaud
 	}
 
-	// Request pseudo terminal
-	//if err := session.RequestPty("xterm", 80, 40, modes); err != nil {
-	//if err := session.RequestPty("xterm-256color", 80, 40, modes); err != nil {
-	if err := session.RequestPty("vt100", 80, 40, modes); err != nil {
-		//if err := session.RequestPty("vt220", 80, 40, modes); err != nil {
-		log.Fatalf("request for pseudo terminal failed: %s", err)
+	fileDescriptor := int(os.Stdin.Fd())
+
+	if terminal.IsTerminal(fileDescriptor) {
+		originalState, err := terminal.MakeRaw(fileDescriptor)
+		if err != nil {
+			log.Fatalf("Unable to put the terminal connected to a file descriptor into raw mode: %v", err)
+		}
+		defer terminal.Restore(fileDescriptor, originalState)
+
+		termWidth, termHeight, err := terminal.GetSize(fileDescriptor)
+		if err != nil {
+			log.Fatalf("Unable to get the dimensions for the terminal: %v", err)
+		}
+
+		err = session.RequestPty("xterm-256color", termHeight, termWidth, modes)
+		if err != nil {
+			log.Fatalf("Unable to request pty for the session: %v", err)
+		}
 	}
 
 	// Start remote shell
@@ -112,12 +125,7 @@ func StartTunnel(tunnelConfig *Config, wg *sync.WaitGroup, semaphore *Semaphore)
 	}()
 
 	// Accepting commands
-	for {
-		reader := bufio.NewReader(os.Stdin)
-		str, _ := reader.ReadString('\n')
-		fmt.Fprint(in, str)
-	}
-
+	session.Wait()
 }
 
 func createBox(tunnelConfig *Config, semaphore *Semaphore) (*ssh.Client, error) {
@@ -170,13 +178,18 @@ func createBox(tunnelConfig *Config, semaphore *Semaphore) (*ssh.Client, error) 
 		return &client, err
 	}
 
+	hostKeyCallBack := dnsHostKeyCallback
+	if tunnelConfig.ConnectionEndpoint.Hostname() != "api.userland.io" {
+		log.Debug("Ignoring hostkey for connection")
+		hostKeyCallBack = ssh.InsecureIgnoreHostKey()
+	}
+
 	sshJumpConfig := &ssh.ClientConfig{
 		User: "punch",
 		Auth: []ssh.AuthMethod{
-			ssh.Password(""),
+			privateKey,
 		},
-		//TODO: Maybe fix this. Will be rotating so dont know if possible
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		HostKeyCallback: hostKeyCallBack,
 		Timeout:         0,
 	}
 
@@ -205,8 +218,9 @@ func createBox(tunnelConfig *Config, semaphore *Semaphore) (*ssh.Client, error) 
 		log.Debugf("Backoff Tick %s", wait.String())
 		time.Sleep(wait)
 	}
+
 	sshBoxConfig := &ssh.ClientConfig{
-		User: "root",
+		User: "punch",
 		Auth: []ssh.AuthMethod{
 			privateKey,
 		},

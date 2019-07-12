@@ -1,4 +1,4 @@
-// ulacli CLI used for interacting with holepunch.io
+// Userland Cloud CLI
 // Copyright (C) 2018-2019  Orb.House, LLC
 //
 // This program is free software: you can redistribute it and/or modify

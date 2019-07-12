@@ -1,4 +1,4 @@
-// ulacli CLI used for interacting with holepunch.io
+// UserLAnd Cloud CLI
 // Copyright (C) 2018-2019  Orb.House, LLC
 //
 // This program is free software: you can redistribute it and/or modify
@@ -52,10 +52,10 @@ var version string
 var rootCmd = &cobra.Command{
 	Version: version,
 	Use:     "ulacli",
-	Short:   "ulacli - CLI for holepunch.io",
-	Long: "ulacli - CLI for holepunch.io\n" +
+	Short:   "UserLAnd Cloud CLI",
+	Long: "UserLAnd Cloud CLI\n" +
 		"To get started, run `ulacli setup`.\n" +
-		"Then you could expose a local web server running on port 8080 like this, `ulacli http 8080`.\n" +
+		"Then you can start your own Linux box in the cloud and connect to it like this `ulacli start`\n" +
 		"Look at the commands below to see what else you can do.",
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		initConfig()
@@ -83,7 +83,7 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "Default is $XDG_HOME/holepunch/~.ulacli.toml")
+	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "Default is $XDG_HOME/userland/~.ulacli.toml")
 	rootCmd.PersistentFlags().StringVar(&logLevel, "loglevel", "", "Set the loglevel")
 	rootCmd.PersistentFlags().BoolVar(&crashReporting, "crashreporting", false, "Send crash reports to the developers")
 	err := rootCmd.PersistentFlags().MarkHidden("loglevel")
@@ -100,6 +100,7 @@ func init() {
 	viper.SetDefault("publickeypath", "")
 	viper.SetDefault("privatekeypath", "")
 	viper.SetDefault("loglevel", "ERROR")
+
 	rootCmd.SetHelpCommand(&cobra.Command{
 		Use:    "no-help",
 		Hidden: true,
