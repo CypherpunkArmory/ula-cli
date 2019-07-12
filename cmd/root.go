@@ -49,8 +49,6 @@ var logLevel string
 //This gets written in the makefile
 var version string
 
-var development = false
-
 var rootCmd = &cobra.Command{
 	Version: version,
 	Use:     "ulacli",
@@ -102,11 +100,6 @@ func init() {
 	viper.SetDefault("publickeypath", "")
 	viper.SetDefault("privatekeypath", "")
 	viper.SetDefault("loglevel", "ERROR")
-	if development {
-		viper.SetDefault("baseurl", "http://localhost:5000")
-		viper.SetDefault("sshendpoint", "ssh://localhost:3122")
-		viper.SetDefault("apiendpoint", "http://localhost:5000")
-	}
 
 	rootCmd.SetHelpCommand(&cobra.Command{
 		Use:    "no-help",
