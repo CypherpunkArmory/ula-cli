@@ -185,7 +185,7 @@ func createBox(tunnelConfig *Config, semaphore *Semaphore) (*ssh.Client, error) 
 	}
 
 	sshJumpConfig := &ssh.ClientConfig{
-		User: "punch",
+		User: "userland",
 		Auth: []ssh.AuthMethod{
 			privateKey,
 		},
@@ -197,7 +197,7 @@ func createBox(tunnelConfig *Config, semaphore *Semaphore) (*ssh.Client, error) 
 	jumpConn, err := ssh.Dial("tcp", jumpServerEndpoint.String(), sshJumpConfig)
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error contacting the holepunch Server.")
+		fmt.Fprintf(os.Stderr, "Error contacting the UserLAnd server.")
 		log.Debugf("%s", err)
 		return &client, err
 	}
@@ -220,7 +220,7 @@ func createBox(tunnelConfig *Config, semaphore *Semaphore) (*ssh.Client, error) 
 	}
 
 	sshBoxConfig := &ssh.ClientConfig{
-		User: "punch",
+		User: "userland",
 		Auth: []ssh.AuthMethod{
 			privateKey,
 		},
