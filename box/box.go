@@ -263,6 +263,6 @@ func cleanup(config *Config) {
 	errDelete := settings.RestAPI.DeleteBoxAPI(settings.Subdomain)
 	if errSession != nil || errDelete != nil {
 		fmt.Fprintf(os.Stderr,
-			"We had some trouble deleting your box. Use ulacli cleanup %s to make sure we know it's closed.\n", settings.Subdomain)
+			"We had some trouble deleting your box\n")
 	}
 }
