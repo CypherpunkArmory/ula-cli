@@ -49,7 +49,6 @@ func startBox() {
 	if err != nil {
 		reportError(err.Error(), true)
 	}
-	subdomain, _ = restAPI.GetSubdomainName(response.Subdomain.ID)
 
 	connectionURL, err := url.Parse(sshEndpoint)
 	if err != nil {

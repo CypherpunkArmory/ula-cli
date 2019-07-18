@@ -21,7 +21,6 @@ import (
 	"fmt"
 )
 
-var errorUnownedSubdomain = errors.New("you do not own this subdomain")
 var errorCantConnectRestCall = errors.New("problem contacting the server")
 var errorUnableToParse = errors.New("can't parse the json response")
 var errorUnownedBox = errors.New("you do not own this box")

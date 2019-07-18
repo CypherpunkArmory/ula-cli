@@ -21,23 +21,9 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"regexp"
-	"strconv"
 	"strings"
 )
 
-func correctSubdomainRegex(subdomain string) bool {
-	r, _ := regexp.Compile(`^[A-Za-z0-9](?:[A-Za-z0-9\-]{0,61}[A-Za-z0-9])?\z`)
-	return r.MatchString(subdomain)
-}
-
-func checkPort(port string) bool {
-	portNo, err := strconv.Atoi(port)
-	if err != nil {
-		reportError(fmt.Sprintf("Invalid port number %s, must be an integer between 0 and 65536", port), true)
-	}
-	return 0 < portNo && portNo < 65536
-}
 
 func fixFilePath(path string) string {
 	if strings.HasPrefix(path, "~/") {

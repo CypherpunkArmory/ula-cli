@@ -43,7 +43,6 @@ var refreshToken string
 var restAPI restapi.RestClient
 var rollbarToken string
 var sshEndpoint string
-var subdomain string
 var logLevel string
 
 //This gets written in the makefile
