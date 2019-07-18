@@ -14,33 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package tunnel
+package box
 
-import (
-	"fmt"
-	"net/url"
+import "sync/atomic"
 
-	"github.com/cypherpunkarmory/ulacli/restapi"
-)
-
-//Config Object to make passing config eaiser
-type Config struct {
-	ConnectionEndpoint url.URL
-	RestAPI            restapi.RestClient
-	TunnelEndpoint     restapi.Tunnel
-	PrivateKeyPath     string
-	LocalPort          string
-	Subdomain          string
-	EndpointType       string
-	EndpointURL        url.URL
-	LogLevel           string
+type Semaphore struct {
+	semaphore int32
 }
 
-type Endpoint struct {
-	Host string
-	Port string
+func (l *Semaphore) CanRun() bool {
+	return atomic.CompareAndSwapInt32(&l.semaphore, 0, 1)
 }
-
-func (e *Endpoint) String() string {
-	return fmt.Sprintf("%s:%s", e.Host, e.Port)
+func (l *Semaphore) Done() {
+	atomic.CompareAndSwapInt32(&l.semaphore, 1, 0)
 }

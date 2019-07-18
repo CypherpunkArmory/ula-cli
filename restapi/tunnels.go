@@ -27,9 +27,9 @@ import (
 	"github.com/google/jsonapi"
 )
 
-//Tunnel JSONAPI response of tunnel object
-type Tunnel struct {
-	ID        string     `jsonapi:"primary,tunnel"`
+//Box JSONAPI response of box object
+type Box struct {
+	ID        string     `jsonapi:"primary,box"`
 	Port      []string   `jsonapi:"attr,port,omitempty"`
 	PublicKey string     `jsonapi:"attr,sshKey,omitempty"`
 	SSHPort   string     `jsonapi:"attr,sshPort,omitempty"`
@@ -37,17 +37,17 @@ type Tunnel struct {
 	Subdomain *Subdomain `jsonapi:"relation,subdomain,omitempty"`
 }
 
-//CreateTunnelAPI calls UserLAnd Cloud web api to get tunnel details
-func (restClient *RestClient) CreateTunnelAPI(subdomain string, publicKey string, protocol []string) (Tunnel, error) {
-	tunnelReturn := Tunnel{}
+//CreateBoxAPI calls UserLAnd Cloud web api to get box details
+func (restClient *RestClient) CreateBoxAPI(subdomain string, publicKey string, protocol []string) (Box, error) {
+	boxReturn := Box{}
 	var outputBuffer bytes.Buffer
 
 	if subdomain != "" {
 		subdomainID, err := restClient.getSubdomainID(subdomain)
 		if err != nil {
-			return tunnelReturn, errorUnownedSubdomain
+			return boxReturn, errorUnownedSubdomain
 		}
-		request := Tunnel{
+		request := Box{
 			Port:      protocol,
 			PublicKey: publicKey,
 			Subdomain: &Subdomain{
@@ -57,10 +57,10 @@ func (restClient *RestClient) CreateTunnelAPI(subdomain string, publicKey string
 		_ = bufio.NewWriter(&outputBuffer)
 		err = jsonapi.MarshalPayload(&outputBuffer, &request)
 		if err != nil {
-			return tunnelReturn, errorUnableToParse
+			return boxReturn, errorUnableToParse
 		}
 	} else {
-		request := Tunnel{
+		request := Box{
 			Port:      protocol,
 			PublicKey: publicKey,
 		}
@@ -68,19 +68,19 @@ func (restClient *RestClient) CreateTunnelAPI(subdomain string, publicKey string
 		_ = bufio.NewWriter(&outputBuffer)
 		err := jsonapi.MarshalPayload(&outputBuffer, &request)
 		if err != nil {
-			return tunnelReturn, errorUnableToParse
+			return boxReturn, errorUnableToParse
 		}
 	}
 
-	url := restClient.URL + "/tunnels"
+	url := restClient.URL + "/boxes"
 	req, err := http.NewRequest("POST", url, &outputBuffer)
 	if err != nil {
-		return tunnelReturn, errorCantConnectRestCall
+		return boxReturn, errorCantConnectRestCall
 	}
 	req.Header.Add("Content-Type", "application/json")
 	resp, err := restClient.Client.Do(req)
 	if err != nil {
-		return tunnelReturn, errorCantConnectRestCall
+		return boxReturn, errorCantConnectRestCall
 	}
 	defer resp.Body.Close()
 
@@ -89,26 +89,26 @@ func (restClient *RestClient) CreateTunnelAPI(subdomain string, publicKey string
 		errObject := ResponseError{}
 		err = json.Unmarshal(buf, &errObject)
 		if err != nil {
-			return tunnelReturn, err
+			return boxReturn, err
 		}
-		return tunnelReturn, &errObject
+		return boxReturn, &errObject
 	}
 
-	err = jsonapi.UnmarshalPayload(resp.Body, &tunnelReturn)
+	err = jsonapi.UnmarshalPayload(resp.Body, &boxReturn)
 	if err != nil {
-		return tunnelReturn, errorUnableToParse
+		return boxReturn, errorUnableToParse
 	}
-	return tunnelReturn, nil
+	return boxReturn, nil
 }
 
-//DeleteTunnelAPI deletes tunnel
-func (restClient *RestClient) DeleteTunnelAPI(subdomainName string) error {
-	id, err := restClient.getTunnelID(subdomainName)
+//DeleteBoxAPI deletes box
+func (restClient *RestClient) DeleteBoxAPI(subdomainName string) error {
+	id, err := restClient.getBoxID(subdomainName)
 	if err != nil {
 		return err
 	}
 
-	url := restClient.URL + "/tunnels/" + id
+	url := restClient.URL + "/boxes/" + id
 	req, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
 		return errorCantConnectRestCall
@@ -135,8 +135,8 @@ func (restClient *RestClient) DeleteTunnelAPI(subdomainName string) error {
 
 	return errorUnableToDelete
 }
-func (restClient *RestClient) getTunnelID(subdomainName string) (string, error) {
-	url := restClient.URL + "/tunnels?filter[subdomain][name]=" + subdomainName
+func (restClient *RestClient) getBoxID(subdomainName string) (string, error) {
+	url := restClient.URL + "/boxes?filter[config][name]=" + subdomainName
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return "", errorCantConnectRestCall
@@ -156,16 +156,16 @@ func (restClient *RestClient) getTunnelID(subdomainName string) (string, error) 
 		return "", &errObject
 	}
 
-	tunnels, err := jsonapi.UnmarshalManyPayload(resp.Body, reflect.TypeOf(new(Tunnel)))
+	boxes, err := jsonapi.UnmarshalManyPayload(resp.Body, reflect.TypeOf(new(Box)))
 	if err != nil {
 		return "", errorUnableToParse
 	}
-	if len(tunnels) == 0 {
-		return "", errorUnownedTunnel
+	if len(boxes) == 0 {
+		return "", errorUnownedBox
 	}
-	t, _ := tunnels[0].(*Tunnel)
+	t, _ := boxes[0].(*Box)
 	if t.ID == "" {
-		return "", errorUnownedTunnel
+		return "", errorUnownedBox
 	}
 	return t.ID, nil
 }

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package tunnel
+package box
 
 import (
 	"fmt"
@@ -34,24 +34,24 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
-type tunnelStatus struct {
+type boxStatus struct {
 	state string
 }
 
 const (
-	tunnelError    string = "error"
-	tunnelDone     string = "done"
-	tunnelStarting string = "starting"
+	boxError    string = "error"
+	boxDone     string = "done"
+	boxStarting string = "starting"
 )
 
-//StartTunnel Main tunneling function. Handles connections and forwarding
-func StartTunnel(tunnelConfig *Config, wg *sync.WaitGroup, semaphore *Semaphore) {
-	defer cleanup(tunnelConfig)
+//StartBox Main box function. Handles connections and forwarding
+func StartBox(boxSettings *Setting, wg *sync.WaitGroup, semaphore *Semaphore) {
+	defer cleanup(boxSettings)
 
 	if wg != nil {
 		defer wg.Done()
 	}
-	client, err := createBox(tunnelConfig, semaphore)
+	client, err := createBox(boxSettings, semaphore)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 		return
@@ -119,7 +119,7 @@ func StartTunnel(tunnelConfig *Config, wg *sync.WaitGroup, semaphore *Semaphore)
 	go func() {
 		<-startCloseChannel
 		if semaphore.CanRun() {
-			cleanup(tunnelConfig)
+			cleanup(boxSettings)
 			os.Exit(0)
 		}
 	}()
@@ -128,8 +128,8 @@ func StartTunnel(tunnelConfig *Config, wg *sync.WaitGroup, semaphore *Semaphore)
 	session.Wait()
 }
 
-func createBox(tunnelConfig *Config, semaphore *Semaphore) (*ssh.Client, error) {
-	tunnelCreating := tunnelStatus{tunnelStarting}
+func createBox(boxSettings *Setting, semaphore *Semaphore) (*ssh.Client, error) {
+	boxCreating := boxStatus{boxStarting}
 	createCloseChannel := make(chan os.Signal)
 	signal.Notify(createCloseChannel,
 		// https://www.gnu.org/software/libc/manual/html_node/Termination-Signals.html
@@ -141,18 +141,18 @@ func createBox(tunnelConfig *Config, semaphore *Semaphore) (*ssh.Client, error) 
 	defer signal.Stop(createCloseChannel)
 	go func() {
 		<-createCloseChannel
-		log.Debugf("Closing tunnel")
-		tunnelCreating.state = tunnelError
+		log.Debugf("Closing box")
+		boxCreating.state = boxError
 		for !semaphore.CanRun() {
 
 		}
 		defer semaphore.Done()
-		cleanup(tunnelConfig)
+		cleanup(boxSettings)
 		os.Exit(0)
 	}()
-	lvl, err := log.ParseLevel(tunnelConfig.LogLevel)
+	lvl, err := log.ParseLevel(boxSettings.LogLevel)
 	if err != nil {
-		log.Errorf("\nLog level %s is not a valid level.", tunnelConfig.LogLevel)
+		log.Errorf("\nLog level %s is not a valid level.", boxSettings.LogLevel)
 	}
 
 	log.SetLevel(lvl)
@@ -160,31 +160,31 @@ func createBox(tunnelConfig *Config, semaphore *Semaphore) (*ssh.Client, error) 
 
 	var client ssh.Client
 
-	sshPort := tunnelConfig.TunnelEndpoint.SSHPort
+	sshPort := boxSettings.BoxEndpoint.SSHPort
 
 	var jumpServerEndpoint = Endpoint{
-		Host: tunnelConfig.ConnectionEndpoint.Hostname(),
-		Port: tunnelConfig.ConnectionEndpoint.Port(),
+		Host: boxSettings.ConnectionEndpoint.Hostname(),
+		Port: boxSettings.ConnectionEndpoint.Port(),
 	}
 
 	// remote SSH server
 	var serverEndpoint = Endpoint{
-		Host: tunnelConfig.TunnelEndpoint.IPAddress,
+		Host: boxSettings.BoxEndpoint.IPAddress,
 		Port: sshPort,
 	}
 
-	privateKey, err := readPrivateKeyFile(tunnelConfig.PrivateKeyPath)
+	privateKey, err := readPrivateKeyFile(boxSettings.PrivateKeyPath)
 	if err != nil {
 		return &client, err
 	}
 
 	hostKeyCallBack := dnsHostKeyCallback
-	if tunnelConfig.ConnectionEndpoint.Hostname() != "api.userland.io" {
+	if boxSettings.ConnectionEndpoint.Hostname() != "api.userland.io" {
 		log.Debug("Ignoring hostkey for connection")
 		hostKeyCallBack = ssh.InsecureIgnoreHostKey()
 	}
 
-	sshJumpConfig := &ssh.ClientConfig{
+	sshJumpSetting := &ssh.ClientSetting{
 		User: "userland",
 		Auth: []ssh.AuthMethod{
 			privateKey,
@@ -194,7 +194,7 @@ func createBox(tunnelConfig *Config, semaphore *Semaphore) (*ssh.Client, error) 
 	}
 
 	log.Debugf("Dial into Jump Server %s", jumpServerEndpoint.String())
-	jumpConn, err := ssh.Dial("tcp", jumpServerEndpoint.String(), sshJumpConfig)
+	jumpConn, err := ssh.Dial("tcp", jumpServerEndpoint.String(), sshJumpSetting)
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error contacting the UserLAnd server.")
@@ -202,7 +202,7 @@ func createBox(tunnelConfig *Config, semaphore *Semaphore) (*ssh.Client, error) 
 		return &client, err
 	}
 
-	tunnelStartingSpinner(semaphore, &tunnelCreating)
+	boxStartingSpinner(semaphore, &boxCreating)
 	exponentialBackoff := backoff.NewExponentialBackOff()
 
 	// Connect to SSH remote server using serverEndpoint
@@ -211,7 +211,7 @@ func createBox(tunnelConfig *Config, semaphore *Semaphore) (*ssh.Client, error) 
 		serverConn, err = jumpConn.Dial("tcp", serverEndpoint.String())
 		log.Debugf("Dial into SSHD Container %s", serverEndpoint.String())
 		if err == nil {
-			tunnelCreating.state = tunnelDone
+			boxCreating.state = boxDone
 			break
 		}
 		wait := exponentialBackoff.NextBackOff()
@@ -219,7 +219,7 @@ func createBox(tunnelConfig *Config, semaphore *Semaphore) (*ssh.Client, error) 
 		time.Sleep(wait)
 	}
 
-	sshBoxConfig := &ssh.ClientConfig{
+	sshBoxSettings := &ssh.ClientSettings{
 		User: "userland",
 		Auth: []ssh.AuthMethod{
 			privateKey,
@@ -228,7 +228,7 @@ func createBox(tunnelConfig *Config, semaphore *Semaphore) (*ssh.Client, error) 
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 		Timeout:         0,
 	}
-	ncc, chans, reqs, err := ssh.NewClientConn(serverConn, serverEndpoint.String(), sshBoxConfig)
+	ncc, chans, reqs, err := ssh.NewClientConn(serverConn, serverEndpoint.String(), sshBoxSettings)
 	if err != nil {
 		return &client, err
 	}
@@ -239,30 +239,30 @@ func createBox(tunnelConfig *Config, semaphore *Semaphore) (*ssh.Client, error) 
 	return sClient, nil
 }
 
-func tunnelStartingSpinner(lock *Semaphore, tunnelStatus *tunnelStatus) {
+func boxStartingSpinner(lock *Semaphore, boxStatus *boxStatus) {
 	go func() {
 		if !lock.CanRun() {
 			return
 		}
 		defer lock.Done()
 		s := spin.New()
-		for tunnelStatus.state == tunnelStarting {
-			fmt.Printf("\rStarting tunnel %s ", s.Next())
+		for boxStatus.state == boxStarting {
+			fmt.Printf("\rStarting box %s ", s.Next())
 			time.Sleep(100 * time.Millisecond)
 		}
-		if tunnelStatus.state == tunnelDone {
-			fmt.Printf("\rStarting tunnel ")
+		if boxStatus.state == boxDone {
+			fmt.Printf("\rStarting box ")
 			d := color.New(color.FgGreen, color.Bold)
 			d.Printf("✔\n")
 		}
 	}()
 }
-func cleanup(config *Config) {
-	fmt.Println("\nClosing tunnel")
-	errSession := config.RestAPI.StartSession(config.RestAPI.RefreshToken)
-	errDelete := config.RestAPI.DeleteTunnelAPI(config.Subdomain)
+func cleanup(settings *Settings) {
+	fmt.Println("\nClosing box")
+	errSession := settings.RestAPI.StartSession(settings.RestAPI.RefreshToken)
+	errDelete := settings.RestAPI.DeleteBoxAPI(settings.Subdomain)
 	if errSession != nil || errDelete != nil {
 		fmt.Fprintf(os.Stderr,
-			"We had some trouble deleting your tunnel. Use ulacli cleanup %s to make sure we know it's closed.\n", config.Subdomain)
+			"We had some trouble deleting your box. Use ulacli cleanup %s to make sure we know it's closed.\n", settings.Subdomain)
 	}
 }

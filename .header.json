@@ -1,5 +1,5 @@
 {
-    "Dir": "./tunnel",
+    "Dir": "./box",
     "Template": ".header.txt",
     "Includes": [
         "**.go"
