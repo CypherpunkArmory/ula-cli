@@ -45,13 +45,13 @@ const (
 )
 
 //StartBox Main box function. Handles connections and forwarding
-func StartBox(boxSettings *Setting, wg *sync.WaitGroup, semaphore *Semaphore) {
-	defer cleanup(boxSettings)
+func StartBox(boxConfig *Config, wg *sync.WaitGroup, semaphore *Semaphore) {
+	defer cleanup(boxConfig)
 
 	if wg != nil {
 		defer wg.Done()
 	}
-	client, err := createBox(boxSettings, semaphore)
+	client, err := createBox(boxConfig, semaphore)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 		return
@@ -119,7 +119,7 @@ func StartBox(boxSettings *Setting, wg *sync.WaitGroup, semaphore *Semaphore) {
 	go func() {
 		<-startCloseChannel
 		if semaphore.CanRun() {
-			cleanup(boxSettings)
+			cleanup(boxConfig)
 			os.Exit(0)
 		}
 	}()
@@ -128,7 +128,7 @@ func StartBox(boxSettings *Setting, wg *sync.WaitGroup, semaphore *Semaphore) {
 	session.Wait()
 }
 
-func createBox(boxSettings *Setting, semaphore *Semaphore) (*ssh.Client, error) {
+func createBox(boxConfig *Config, semaphore *Semaphore) (*ssh.Client, error) {
 	boxCreating := boxStatus{boxStarting}
 	createCloseChannel := make(chan os.Signal)
 	signal.Notify(createCloseChannel,
@@ -147,12 +147,12 @@ func createBox(boxSettings *Setting, semaphore *Semaphore) (*ssh.Client, error) 
 
 		}
 		defer semaphore.Done()
-		cleanup(boxSettings)
+		cleanup(boxConfig)
 		os.Exit(0)
 	}()
-	lvl, err := log.ParseLevel(boxSettings.LogLevel)
+	lvl, err := log.ParseLevel(boxConfig.LogLevel)
 	if err != nil {
-		log.Errorf("\nLog level %s is not a valid level.", boxSettings.LogLevel)
+		log.Errorf("\nLog level %s is not a valid level.", boxConfig.LogLevel)
 	}
 
 	log.SetLevel(lvl)
@@ -160,31 +160,31 @@ func createBox(boxSettings *Setting, semaphore *Semaphore) (*ssh.Client, error) 
 
 	var client ssh.Client
 
-	sshPort := boxSettings.BoxEndpoint.SSHPort
+	sshPort := boxConfig.Box.SSHPort
 
 	var jumpServerEndpoint = Endpoint{
-		Host: boxSettings.ConnectionEndpoint.Hostname(),
-		Port: boxSettings.ConnectionEndpoint.Port(),
+		Host: boxConfig.ConnectionEndpoint.Hostname(),
+		Port: boxConfig.ConnectionEndpoint.Port(),
 	}
 
 	// remote SSH server
 	var serverEndpoint = Endpoint{
-		Host: boxSettings.BoxEndpoint.IPAddress,
+		Host: boxConfig.Box.IPAddress,
 		Port: sshPort,
 	}
 
-	privateKey, err := readPrivateKeyFile(boxSettings.PrivateKeyPath)
+	privateKey, err := readPrivateKeyFile(boxConfig.PrivateKeyPath)
 	if err != nil {
 		return &client, err
 	}
 
 	hostKeyCallBack := dnsHostKeyCallback
-	if boxSettings.ConnectionEndpoint.Hostname() != "api.userland.io" {
+	if boxConfig.ConnectionEndpoint.Hostname() != "api.userland.io" {
 		log.Debug("Ignoring hostkey for connection")
 		hostKeyCallBack = ssh.InsecureIgnoreHostKey()
 	}
 
-	sshJumpSetting := &ssh.ClientSetting{
+	sshJumpConfig := &ssh.ClientConfig{
 		User: "userland",
 		Auth: []ssh.AuthMethod{
 			privateKey,
@@ -194,7 +194,7 @@ func createBox(boxSettings *Setting, semaphore *Semaphore) (*ssh.Client, error) 
 	}
 
 	log.Debugf("Dial into Jump Server %s", jumpServerEndpoint.String())
-	jumpConn, err := ssh.Dial("tcp", jumpServerEndpoint.String(), sshJumpSetting)
+	jumpConn, err := ssh.Dial("tcp", jumpServerEndpoint.String(), sshJumpConfig)
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error contacting the UserLAnd server.")
@@ -219,7 +219,7 @@ func createBox(boxSettings *Setting, semaphore *Semaphore) (*ssh.Client, error) 
 		time.Sleep(wait)
 	}
 
-	sshBoxSettings := &ssh.ClientSettings{
+	sshBoxConfig := &ssh.ClientConfig{
 		User: "userland",
 		Auth: []ssh.AuthMethod{
 			privateKey,
@@ -228,7 +228,7 @@ func createBox(boxSettings *Setting, semaphore *Semaphore) (*ssh.Client, error) 
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 		Timeout:         0,
 	}
-	ncc, chans, reqs, err := ssh.NewClientConn(serverConn, serverEndpoint.String(), sshBoxSettings)
+	ncc, chans, reqs, err := ssh.NewClientConn(serverConn, serverEndpoint.String(), sshBoxConfig)
 	if err != nil {
 		return &client, err
 	}
@@ -257,7 +257,7 @@ func boxStartingSpinner(lock *Semaphore, boxStatus *boxStatus) {
 		}
 	}()
 }
-func cleanup(settings *Settings) {
+func cleanup(config *Config) {
 	fmt.Println("\nClosing box")
 	errSession := settings.RestAPI.StartSession(settings.RestAPI.RefreshToken)
 	errDelete := settings.RestAPI.DeleteBoxAPI(settings.Subdomain)

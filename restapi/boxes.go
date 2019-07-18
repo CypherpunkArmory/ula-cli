@@ -34,7 +34,7 @@ type Box struct {
 	PublicKey string     `jsonapi:"attr,sshKey,omitempty"`
 	SSHPort   string     `jsonapi:"attr,sshPort,omitempty"`
 	IPAddress string     `jsonapi:"attr,ipAddress,omitempty"`
-	Subdomain *Subdomain `jsonapi:"relation,config,omitempty"`
+	Config *Config `jsonapi:"relation,config,omitempty"`
 }
 
 //CreateBoxAPI calls UserLAnd Cloud web api to get box details

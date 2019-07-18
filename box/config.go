@@ -23,8 +23,8 @@ import (
 	"github.com/cypherpunkarmory/ulacli/restapi"
 )
 
-//Settings Object to make passing settings eaiser
-type Settings struct {
+//Config Object to make passing configs eaiser
+type Config struct {
 	ConnectionEndpoint url.URL
 	RestAPI            restapi.RestClient
 	BoxEndpoint        restapi.Box
