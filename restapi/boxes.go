@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-	"reflect"
 
 	"github.com/google/jsonapi"
 )
@@ -38,38 +37,18 @@ type Box struct {
 }
 
 //CreateBoxAPI calls UserLAnd Cloud web api to get box details
-func (restClient *RestClient) CreateBoxAPI(subdomain string, publicKey string, protocol []string) (Box, error) {
+func (restClient *RestClient) CreateBoxAPI(publicKey string) (Box, error) {
 	boxReturn := Box{}
 	var outputBuffer bytes.Buffer
 
-	if subdomain != "" {
-		subdomainID, err := restClient.getSubdomainID(subdomain)
-		if err != nil {
-			return boxReturn, errorUnownedSubdomain
-		}
-		request := Box{
-			Port:      protocol,
-			PublicKey: publicKey,
-			Subdomain: &Subdomain{
-				ID: subdomainID,
-			},
-		}
-		_ = bufio.NewWriter(&outputBuffer)
-		err = jsonapi.MarshalPayload(&outputBuffer, &request)
-		if err != nil {
-			return boxReturn, errorUnableToParse
-		}
-	} else {
-		request := Box{
-			Port:      protocol,
-			PublicKey: publicKey,
-		}
+	request := Box{
+		PublicKey: publicKey,
+	}
 
-		_ = bufio.NewWriter(&outputBuffer)
-		err := jsonapi.MarshalPayload(&outputBuffer, &request)
-		if err != nil {
-			return boxReturn, errorUnableToParse
-		}
+	_ = bufio.NewWriter(&outputBuffer)
+	err := jsonapi.MarshalPayload(&outputBuffer, &request)
+	if err != nil {
+		return boxReturn, errorUnableToParse
 	}
 
 	url := restClient.URL + "/boxes"
@@ -102,13 +81,9 @@ func (restClient *RestClient) CreateBoxAPI(subdomain string, publicKey string, p
 }
 
 //DeleteBoxAPI deletes box
-func (restClient *RestClient) DeleteBoxAPI(subdomainName string) error {
-	id, err := restClient.getBoxID(subdomainName)
-	if err != nil {
-		return err
-	}
+func (restClient *RestClient) DeleteBoxAPI(boxId string) error {
 
-	url := restClient.URL + "/boxes/" + id
+	url := restClient.URL + "/boxes/" + boxId
 	req, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
 		return errorCantConnectRestCall
@@ -135,37 +110,37 @@ func (restClient *RestClient) DeleteBoxAPI(subdomainName string) error {
 
 	return errorUnableToDelete
 }
-func (restClient *RestClient) getBoxID(subdomainName string) (string, error) {
-	url := restClient.URL + "/boxes?filter[config][name]=" + subdomainName
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return "", errorCantConnectRestCall
-	}
-	resp, err := restClient.Client.Do(req)
-	if err != nil {
-		return "", errorCantConnectRestCall
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode > 399 {
-		buf, _ := ioutil.ReadAll(resp.Body)
-		errObject := ResponseError{}
-		err = json.Unmarshal(buf, &errObject)
-		if err != nil {
-			return "", err
-		}
-		return "", &errObject
-	}
+// func (restClient *RestClient) getBoxID(subdomainName string) (string, error) {
+// 	url := restClient.URL + "/boxes?filter[config][name]=" + subdomainName
+// 	req, err := http.NewRequest("GET", url, nil)
+// 	if err != nil {
+// 		return "", errorCantConnectRestCall
+// 	}
+// 	resp, err := restClient.Client.Do(req)
+// 	if err != nil {
+// 		return "", errorCantConnectRestCall
+// 	}
+// 	defer resp.Body.Close()
+// 	if resp.StatusCode > 399 {
+// 		buf, _ := ioutil.ReadAll(resp.Body)
+// 		errObject := ResponseError{}
+// 		err = json.Unmarshal(buf, &errObject)
+// 		if err != nil {
+// 			return "", err
+// 		}
+// 		return "", &errObject
+// 	}
 
-	boxes, err := jsonapi.UnmarshalManyPayload(resp.Body, reflect.TypeOf(new(Box)))
-	if err != nil {
-		return "", errorUnableToParse
-	}
-	if len(boxes) == 0 {
-		return "", errorUnownedBox
-	}
-	t, _ := boxes[0].(*Box)
-	if t.ID == "" {
-		return "", errorUnownedBox
-	}
-	return t.ID, nil
-}
+// 	boxes, err := jsonapi.UnmarshalManyPayload(resp.Body, reflect.TypeOf(new(Box)))
+// 	if err != nil {
+// 		return "", errorUnableToParse
+// 	}
+// 	if len(boxes) == 0 {
+// 		return "", errorUnownedBox
+// 	}
+// 	t, _ := boxes[0].(*Box)
+// 	if t.ID == "" {
+// 		return "", errorUnownedBox
+// 	}
+// 	return t.ID, nil
+// }

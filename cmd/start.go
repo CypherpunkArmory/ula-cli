@@ -43,8 +43,7 @@ func startBox() {
 		os.Exit(3)
 	}
 
-	protocol := []string{"http"}
-	response, err := restAPI.CreateBoxAPI("", publicKey, protocol)
+	response, err := restAPI.CreateBoxAPI(publicKey)
 
 	if err != nil {
 		reportError(err.Error(), true)
@@ -56,20 +55,12 @@ func startBox() {
 		os.Exit(3)
 	}
 
-	baseURL, err := url.Parse(baseURL)
-	if err != nil {
-		reportError("The base url is not a valid URL", true)
-	}
-
 	boxConfig := box.Config{
 		ConnectionEndpoint: *connectionURL,
 		RestAPI:            restAPI,
-		BoxEndpoint:        response,
-		EndpointType:       "http",
+		Box:        		response,
 		PrivateKeyPath:     privateKeyPath,
-		EndpointURL:        *baseURL,
 		LocalPort:          port,
-		Subdomain:          subdomain,
 		LogLevel:           logLevel,
 	}
 	semaphore := box.Semaphore{}
