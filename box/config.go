@@ -27,12 +27,9 @@ import (
 type Config struct {
 	ConnectionEndpoint url.URL
 	RestAPI            restapi.RestClient
-	BoxEndpoint        restapi.Box
+	Box		           restapi.Box
 	PrivateKeyPath     string
 	LocalPort          string
-	Subdomain          string
-	EndpointType       string
-	EndpointURL        url.URL
 	LogLevel           string
 }
 
