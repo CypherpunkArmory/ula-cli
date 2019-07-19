@@ -16,12 +16,6 @@
 
 package restapi
 
-// import (
-
-
-// 	"github.com/google/jsonapi"
-// )
-
 //Config object that holds all needed info
 type Config struct {
 	ID       string `jsonapi:"primary,config"`

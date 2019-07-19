@@ -110,37 +110,3 @@ func (restClient *RestClient) DeleteBoxAPI(boxId string) error {
 
 	return errorUnableToDelete
 }
-// func (restClient *RestClient) getBoxID(subdomainName string) (string, error) {
-// 	url := restClient.URL + "/boxes?filter[config][name]=" + subdomainName
-// 	req, err := http.NewRequest("GET", url, nil)
-// 	if err != nil {
-// 		return "", errorCantConnectRestCall
-// 	}
-// 	resp, err := restClient.Client.Do(req)
-// 	if err != nil {
-// 		return "", errorCantConnectRestCall
-// 	}
-// 	defer resp.Body.Close()
-// 	if resp.StatusCode > 399 {
-// 		buf, _ := ioutil.ReadAll(resp.Body)
-// 		errObject := ResponseError{}
-// 		err = json.Unmarshal(buf, &errObject)
-// 		if err != nil {
-// 			return "", err
-// 		}
-// 		return "", &errObject
-// 	}
-
-// 	boxes, err := jsonapi.UnmarshalManyPayload(resp.Body, reflect.TypeOf(new(Box)))
-// 	if err != nil {
-// 		return "", errorUnableToParse
-// 	}
-// 	if len(boxes) == 0 {
-// 		return "", errorUnownedBox
-// 	}
-// 	t, _ := boxes[0].(*Box)
-// 	if t.ID == "" {
-// 		return "", errorUnownedBox
-// 	}
-// 	return t.ID, nil
-// }
