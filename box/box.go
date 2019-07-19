@@ -259,7 +259,9 @@ func boxStartingSpinner(lock *Semaphore, boxStatus *boxStatus) {
 }
 func cleanup(config *Config) {
 	fmt.Println("\nClosing box")
+	config.RestAPI.SetRefreshToken(config.RestAPI.RefreshToken)
 	errSession := settings.RestAPI.StartSession(settings.RestAPI.RefreshToken)
+    config.RestAPI.SetAPIKey(config.RestAPI.APIKey)
 	errDelete := settings.RestAPI.DeleteBoxAPI(settings.Subdomain)
 	if errSession != nil || errDelete != nil {
 		fmt.Fprintf(os.Stderr,
