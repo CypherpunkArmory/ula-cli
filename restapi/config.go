@@ -14,17 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package tunnel
+package restapi
 
-import "sync/atomic"
-
-type Semaphore struct {
-	semaphore int32
+//Config object that holds all needed info
+type Config struct {
+	ID       string `jsonapi:"primary,config"`
 }
 
-func (l *Semaphore) CanRun() bool {
-	return atomic.CompareAndSwapInt32(&l.semaphore, 0, 1)
-}
-func (l *Semaphore) Done() {
-	atomic.CompareAndSwapInt32(&l.semaphore, 1, 0)
-}

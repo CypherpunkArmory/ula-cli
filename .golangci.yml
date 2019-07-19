@@ -46,7 +46,7 @@ issues:
       text: "(viper.|MarkFlag|telnet)"
       linters:
         - errcheck
-    - path: tunnel/tunnel.go
+    - path: box/box.go
       text: "InsecureIgnoreHostKey"
       linters:
         - gosec
@@ -54,7 +54,7 @@ run:
   skip-dirs:
     - cmd/test
     - cmd/test-files
-    - tunnel/test-files
+    - box/test-files
   skip-files:
     - cmd/test/test-helpers.go
   deadline: 1m

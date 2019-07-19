@@ -14,31 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package restapi
+package box
 
-import (
-	"errors"
-	"fmt"
-)
+import "sync/atomic"
 
-var errorCantConnectRestCall = errors.New("problem contacting the server")
-var errorUnableToParse = errors.New("can't parse the json response")
-var errorUnownedBox = errors.New("you do not own this box")
-var errorUnableToDelete = errors.New("failed to delete")
-
-//ResponseError JSONapi response error
-type ResponseError struct {
-	Data struct {
-		Type       string `json:"type"`
-		Attributes struct {
-			Title  string `json:"title"`
-			Status string `json:"status"`
-			Detail string `json:"detail"`
-		} `json:"attributes"`
-		ID string `json:"id"`
-	} `json:"data"`
+type Semaphore struct {
+	semaphore int32
 }
 
-func (e *ResponseError) Error() string {
-	return fmt.Sprintf(e.Data.Attributes.Detail)
+func (l *Semaphore) CanRun() bool {
+	return atomic.CompareAndSwapInt32(&l.semaphore, 0, 1)
+}
+func (l *Semaphore) Done() {
+	atomic.CompareAndSwapInt32(&l.semaphore, 1, 0)
 }

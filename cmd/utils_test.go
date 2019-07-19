@@ -26,43 +26,7 @@ import (
 	"github.com/kami-zh/go-capturer"
 )
 
-func TestcorrectSubdomainRegex(t *testing.T) {
-	cases := []struct {
-		Name     string
-		Input    string
-		Expected bool
-	}{
-		{"Valid", "testdomain", true},
-		{"Invalid", " ooiqhwe&*&", false},
-	}
-	for _, tc := range cases {
-		t.Run(tc.Name, func(t *testing.T) {
-			actual := correctSubdomainRegex(tc.Input)
-			if actual != tc.Expected {
-				t.Fatal("Failed")
-			}
-		})
-	}
-}
-func TestCheckPort(t *testing.T) {
-	cases := []struct {
-		Name     string
-		Input    string
-		Expected bool
-	}{
-		{"TooLow", "0", false},
-		{"Valid", "12374", true},
-		{"TooHigh", "65536", false},
-	}
-	for _, tc := range cases {
-		t.Run(tc.Name, func(t *testing.T) {
-			actual := checkPort(tc.Input)
-			if actual != tc.Expected {
-				t.Fatal("Failed")
-			}
-		})
-	}
-}
+
 func TestFixFilePath(t *testing.T) {
 	cases := []struct {
 		Name       string

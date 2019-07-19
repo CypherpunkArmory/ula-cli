@@ -16,7 +16,7 @@
 
 // +build all unit
 
-package tunnel
+package box
 
 import (
 	"path/filepath"

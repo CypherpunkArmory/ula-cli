@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package tunnel
+package box
 
 import (
 	"fmt"
@@ -25,7 +25,7 @@ import (
 )
 
 // From https://sosedoff.com/2015/05/25/ssh-port-forwarding-with-go.html
-// Handle local client connections and tunnel data to the remote server
+// Handle local client connections and box data to the remote server
 // Will use io.Copy - http://golang.org/pkg/io/#Copy
 func handleClient(client io.ReadWriteCloser, remote io.ReadWriteCloser) {
 	ioFinished := &sync.WaitGroup{}

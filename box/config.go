@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package tunnel
+package box
 
 import (
 	"fmt"
@@ -23,16 +23,13 @@ import (
 	"github.com/cypherpunkarmory/ulacli/restapi"
 )
 
-//Config Object to make passing config eaiser
+//Config Object to make passing configs eaiser
 type Config struct {
 	ConnectionEndpoint url.URL
 	RestAPI            restapi.RestClient
-	TunnelEndpoint     restapi.Tunnel
+	Box		           restapi.Box
 	PrivateKeyPath     string
 	LocalPort          string
-	Subdomain          string
-	EndpointType       string
-	EndpointURL        url.URL
 	LogLevel           string
 }
 

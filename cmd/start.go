@@ -19,10 +19,8 @@ package cmd
 import (
 	"net/url"
 	"os"
-
-	"github.com/cypherpunkarmory/ulacli/tunnel"
-
 	"github.com/spf13/cobra"
+	"github.com/cypherpunkarmory/ulacli/box"
 )
 
 // httpCmd represents the http command
@@ -45,13 +43,11 @@ func startBox() {
 		os.Exit(3)
 	}
 
-	protocol := []string{"http"}
-	response, err := restAPI.CreateTunnelAPI("", publicKey, protocol)
+	response, err := restAPI.CreateBoxAPI(publicKey)
 
 	if err != nil {
 		reportError(err.Error(), true)
 	}
-	subdomain, _ = restAPI.GetSubdomainName(response.Subdomain.ID)
 
 	connectionURL, err := url.Parse(sshEndpoint)
 	if err != nil {
@@ -59,22 +55,14 @@ func startBox() {
 		os.Exit(3)
 	}
 
-	baseURL, err := url.Parse(baseURL)
-	if err != nil {
-		reportError("The base url is not a valid URL", true)
-	}
-
-	tunnelConfig := tunnel.Config{
+	boxConfig := box.Config{
 		ConnectionEndpoint: *connectionURL,
 		RestAPI:            restAPI,
-		TunnelEndpoint:     response,
-		EndpointType:       "http",
+		Box:        		response,
 		PrivateKeyPath:     privateKeyPath,
-		EndpointURL:        *baseURL,
 		LocalPort:          port,
-		Subdomain:          subdomain,
 		LogLevel:           logLevel,
 	}
-	semaphore := tunnel.Semaphore{}
-	tunnel.StartTunnel(&tunnelConfig, nil, &semaphore)
+	semaphore := box.Semaphore{}
+	box.StartBox(&boxConfig, nil, &semaphore)
 }
