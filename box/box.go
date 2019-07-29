@@ -179,7 +179,7 @@ func createBox(boxConfig *Config, semaphore *Semaphore) (*ssh.Client, error) {
 	}
 
 	hostKeyCallBack := dnsHostKeyCallback
-	if boxConfig.ConnectionEndpoint.Hostname() != "api.userland.io" {
+	if boxConfig.ConnectionEndpoint.Hostname() != "api.userland.tech" {
 		log.Debug("Ignoring hostkey for connection")
 		hostKeyCallBack = ssh.InsecureIgnoreHostKey()
 	}
@@ -187,7 +187,7 @@ func createBox(boxConfig *Config, semaphore *Semaphore) (*ssh.Client, error) {
 	sshJumpConfig := &ssh.ClientConfig{
 		User: "userland",
 		Auth: []ssh.AuthMethod{
-			privateKey,
+			ssh.Password(""),
 		},
 		HostKeyCallback: hostKeyCallBack,
 		Timeout:         0,
@@ -261,7 +261,7 @@ func cleanup(config *Config) {
 	fmt.Println("\nClosing box")
 	config.RestAPI.SetRefreshToken(config.RestAPI.RefreshToken)
 	errSession := config.RestAPI.StartSession(config.RestAPI.RefreshToken)
-    config.RestAPI.SetAPIKey(config.RestAPI.APIKey)
+	config.RestAPI.SetAPIKey(config.RestAPI.APIKey)
 	errDelete := config.RestAPI.DeleteBoxAPI(config.Box.ID)
 	if errSession != nil || errDelete != nil {
 		fmt.Fprintf(os.Stderr,
