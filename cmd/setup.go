@@ -19,6 +19,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"syscall"
 
@@ -50,14 +51,15 @@ var setupCmd = &cobra.Command{
 			fmt.Print(color.GreenString("`ulacli generate-key`"), "\n\n")
 			return
 		}
-		err := generateKey("", "userland_key")
+		path := configPath + string(filepath.Separator)
+		err := generateKey(path, "userland_key")
 		if err != nil {
 			reportError("Could not generate key", true)
 		}
 		fmt.Print("Generated keys in the current directory ")
 		d := color.New(color.FgGreen, color.Bold)
 		d.Printf("✔\n")
-		err = writeKeysToConfig("", "userland_key")
+		err = writeKeysToConfig(path, "userland_key")
 		if err != nil {
 			reportError("Failed to update config file", true)
 		}
