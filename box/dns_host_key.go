@@ -14,7 +14,7 @@ import (
 var errNoHostKeyFound = fmt.Errorf("sshfp: no host key found")
 
 func dnsHostKeyCallback(hostname string, remote net.Addr, key ssh.PublicKey) error {
-	txtrecords, err := net.LookupTXT("localhost")
+	txtrecords, err := net.LookupTXT("api.userland.tech")
 	if err != nil {
 		return err
 	}
