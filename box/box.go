@@ -179,13 +179,13 @@ func createBox(boxConfig *Config, semaphore *Semaphore) (*ssh.Client, error) {
 	}
 
 	hostKeyCallBack := dnsHostKeyCallback
-	if boxConfig.ConnectionEndpoint.Hostname() != "api.userland.tech" {
+	//if boxConfig.ConnectionEndpoint.Hostname() != "api.userland.tech" {
 		log.Debug("Ignoring hostkey for connection")
 		hostKeyCallBack = ssh.InsecureIgnoreHostKey()
-	}
+	//}
 
 	sshJumpConfig := &ssh.ClientConfig{
-		User: "userland",
+		User: "punch",
 		Auth: []ssh.AuthMethod{
 			ssh.Password(""),
 		},
