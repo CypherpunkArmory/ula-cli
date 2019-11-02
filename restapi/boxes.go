@@ -31,18 +31,20 @@ type Box struct {
 	ID        string     `jsonapi:"primary,box"`
 	Port      []string   `jsonapi:"attr,port,omitempty"`
 	PublicKey string     `jsonapi:"attr,sshKey,omitempty"`
+	Image     string     `jsonapi:"attr,image,omitempty"`
 	SSHPort   string     `jsonapi:"attr,sshPort,omitempty"`
 	IPAddress string     `jsonapi:"attr,ipAddress,omitempty"`
 	Config *Config `jsonapi:"relation,config,omitempty"`
 }
 
 //CreateBoxAPI calls UserLAnd Cloud web api to get box details
-func (restClient *RestClient) CreateBoxAPI(publicKey string) (Box, error) {
+func (restClient *RestClient) CreateBoxAPI(publicKey string, image string) (Box, error) {
 	boxReturn := Box{}
 	var outputBuffer bytes.Buffer
 
 	request := Box{
 		PublicKey: publicKey,
+		Image: image,
 	}
 
 	_ = bufio.NewWriter(&outputBuffer)

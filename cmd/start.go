@@ -21,20 +21,32 @@ import (
 	"os"
 	"github.com/spf13/cobra"
 	"github.com/cypherpunkarmory/ulacli/box"
+
 )
 
-// httpCmd represents the http command
-var httpCmd = &cobra.Command{
-	Use:   "start",
-	Short: "s",
-	Long:  "start",
+// startCmd represents the http command
+var startCmd = &cobra.Command{
+	Use:   "start [image]",
+	Short: "Start a new box and connect to it",
+	Long:  "Start a new box and connect to it.\n" +
+		"Example: `ula-cli start` start a new box and connect you to it.\n" +
+		"You can provide an optional 2nd argument to specify the image type.\n" +
+		"Example: `ula-cli start debian` will start a Debian based box and \n" +
+		"         connect you to it.\n" +
+		"Otherwise it will default to using an Ubuntu based box.\n" +
+		"Currently supported images are debian, kali and ubuntu.",
+	Args: cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
+		image = "ubuntu"
+		if len(args) == 1 {
+			image = args[0]
+		}
 		startBox()
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(httpCmd)
+	rootCmd.AddCommand(startCmd)
 }
 
 func startBox() {
@@ -43,7 +55,7 @@ func startBox() {
 		os.Exit(3)
 	}
 
-	response, err := restAPI.CreateBoxAPI(publicKey)
+	response, err := restAPI.CreateBoxAPI(publicKey, image)
 
 	if err != nil {
 		reportError(err.Error(), true)
@@ -58,7 +70,7 @@ func startBox() {
 	boxConfig := box.Config{
 		ConnectionEndpoint: *connectionURL,
 		RestAPI:            restAPI,
-		Box:        		response,
+		Box:                response,
 		PrivateKeyPath:     privateKeyPath,
 		LocalPort:          port,
 		LogLevel:           logLevel,
